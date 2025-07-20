@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>dark room</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -13,13 +13,15 @@
     }
 
     body {
-      font-family: 'Cinzel Decorative', serif;
-      color: #ffffffcc;
+      font-family: 'Fira Code', monospace;
       background-color: #000;
+      color: #0f0;
+      padding: 20px;
+      height: 100vh;
       overflow: hidden;
     }
 
-    #bg-video {
+    video#bg {
       position: fixed;
       top: 0;
       left: 0;
@@ -34,49 +36,51 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: radial-gradient(ellipse at center, rgba(0,0,0,0.5) 0%, #000 100%);
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.4), #000);
       z-index: -1;
     }
 
-    .content {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      width: 90%;
+    #terminal {
       max-width: 800px;
+      margin: 0 auto;
+      height: 100%;
+      overflow-y: auto;
     }
 
-    h1 {
-      font-size: 3em;
-      margin-bottom: 0.2em;
-      color: #fff;
-      text-shadow: 0 0 10px #ffffff22;
+    .line {
+      display: block;
+      margin: 5px 0;
     }
 
-    p {
-      font-size: 1.1em;
-      margin-bottom: 1em;
-      color: #aaa;
+    .input-line {
+      display: flex;
+      align-items: center;
     }
 
-    iframe {
-      width: 100%;
-      height: 500px;
+    .prompt {
+      margin-right: 10px;
+      white-space: nowrap;
+    }
+
+    input {
+      background: none;
       border: none;
-      filter: grayscale(1) opacity(0.9);
-      border-radius: 8px;
+      color: #0f0;
+      font-family: inherit;
+      font-size: 1em;
+      outline: none;
+      width: 100%;
+    }
+
+    ::selection {
+      background: rgba(0, 255, 0, 0.3);
     }
 
     @media (max-width: 600px) {
-      h1 {
-        font-size: 2em;
-      }
-      iframe {
-        height: 400px;
+      body {
+        font-size: 0.9em;
       }
     }
   </style>
@@ -84,18 +88,54 @@
 <body>
 
   <!-- Фон: свеча -->
-  <video id="bg-video" autoplay muted loop>
+  <video id="bg" autoplay muted loop>
     <source src="https://cdn.pixabay.com/video/2022/09/26/132185-760544174_large.mp4" type="video/mp4">
-    Your browser does not support the video tag.
   </video>
-
   <div class="overlay"></div>
 
-  <div class="content">
-    <h1>dark room</h1>
-    <p>a place to speak without light</p>
-    <iframe src="https://tlk.io/mysitechat?noheader=true&theme=theme--night"></iframe>
+  <!-- Терминал -->
+  <div id="terminal">
+    <div class="line">darkroom v1.0 — type <span style="color:#fff">help</span> to begin</div>
+    <div class="input-line">
+      <span class="prompt">> user@darkroom:~$</span>
+      <input type="text" id="commandInput" autofocus autocomplete="off" />
+    </div>
   </div>
 
+  <script>
+    const terminal = document.getElementById('terminal');
+    const input = document.getElementById('commandInput');
+
+    const responses = {
+      help: `Available commands: help, whoami, speak, clear`,
+      whoami: `You are a shadow in the void.`,
+      speak: `"The silence speaks louder than words."`,
+      clear: `` // handled separately
+    };
+
+    function printLine(text) {
+      const line = document.createElement('div');
+      line.className = 'line';
+      line.textContent = text;
+      terminal.insertBefore(line, terminal.querySelector('.input-line'));
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        const command = input.value.trim();
+        printLine(`> user@darkroom:~$ ${command}`);
+        if (command === 'clear') {
+          const lines = terminal.querySelectorAll('.line');
+          lines.forEach(line => line.remove());
+        } else if (responses[command]) {
+          printLine(responses[command]);
+        } else if (command !== '') {
+          printLine(`Unknown command: '${command}'`);
+        }
+        input.value = '';
+      }
+    });
+  </script>
 </body>
 </html>
